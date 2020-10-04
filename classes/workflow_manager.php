@@ -54,6 +54,15 @@ class workflow_manager {
         return $workflows;
     }
 
+    protected static function get_company_filter() {
+        if (is_siteadmin()) {
+            return array();
+        } else {
+            // need to check that this varifies the user is in the company
+            return array( 'companyid' => $companyid = \iomad::get_my_companyid(\context_system::instance()));
+        }
+    }
+
     /**
      * Get workflow count.
      *
@@ -61,7 +70,7 @@ class workflow_manager {
      */
     public static function count_workflows() {
         global $DB;
-        $count = $DB->count_records('tool_trigger_workflows');
+        $count = $DB->count_records('tool_trigger_workflows', self::get_company_filter());
         return $count;
     }
 
@@ -73,7 +82,10 @@ class workflow_manager {
      */
     public static function get_workflow($workflowid) {
         global $DB;
-        $record = $DB->get_record('tool_trigger_workflows', ['id' => $workflowid], '*', IGNORE_MISSING);
+
+        $workflow_vars = array_merge(['id' => $workflowid], self::get_company_filter());
+
+        $record = $DB->get_record('tool_trigger_workflows', $workflow_vars, '*', IGNORE_MISSING);
         if (!$record) {
             return false;
         } else {
@@ -92,13 +104,15 @@ class workflow_manager {
         global $DB;
         $workflowrecord = false;
 
+
         try {
             // Start transaction.
             $transaction = $DB->start_delegated_transaction();
 
             // Get workflow record.
             $worflowfields = 'name, description, event, debug';
-            $workflowrecord = $DB->get_record('tool_trigger_workflows', ['id' => $workflowid], $worflowfields, MUST_EXIST);
+            $workflow_vars = array_merge(['id' => $workflowid], self::get_company_filter());
+            $workflowrecord = $DB->get_record('tool_trigger_workflows', $workflow_vars, $worflowfields, MUST_EXIST);
 
             // Get step records.
             $stepfields = 'id, name, description, type, stepclass, data, steporder';
@@ -133,10 +147,16 @@ class workflow_manager {
     public static function get_workflows_paginated($limitfrom = 0, $limitto = 0) {
         global $DB;
 
+        $where = "s.workflowid = w.id";
+        $company = self::get_company_filter();
+        if ($company) {
+            $where = $where . " and companyid=".$company['companyid'];
+        }
+
         $records = $DB->get_records_sql("
             select
                 *,
-                (select count(*) from {tool_trigger_steps} s where s.workflowid = w.id) as numsteps
+                (select count(*) from {tool_trigger_steps} s where " . $where .") as numsteps
             from {tool_trigger_workflows} w
             order by name ASC",
             null,

@@ -37,6 +37,12 @@ $context = context_system::instance();
 // Check for caps.
 require_capability('tool/trigger:manageworkflows', $context);
 
+// Check for caps.
+iomad::require_capability('block/iomad_company_admin:company_edit_event_triggers', $context);
+
+// Set the companyid
+$companyid = iomad::get_my_companyid($context);
+
 // Set up the page.
 $PAGE->set_context($context);
 $PAGE->set_url($url);
@@ -64,17 +70,51 @@ $PAGE->requires->js_call_amd('tool_trigger/step_select', 'init', array($context-
 
 $eventlist = \tool_monitor\eventlist::get_all_eventlist();
 
+$allowed_list = array(
+    '\core\event\competency_updated' => true,
+    '\core\event\competency_user_competency_plan_viewed' => true,
+    '\core\event\competency_user_competency_rated_in_course' => true,
+    '\core\event\competency_user_competency_rated_in_plan' => true,
+    '\core\event\competency_user_competency_rated' => true,
+    '\core\event\competency_user_competency_review_request_cancelled' => true,
+    '\core\event\competency_user_competency_review_requested' => true,
+    '\core\event\competency_user_competency_review_started' => true,
+    '\core\event\competency_user_competency_review_stopped' => true,
+    '\core\event\competency_user_evidence_created' => true,
+    '\core\event\competency_user_evidence_deleted' => true,
+    '\core\event\competency_user_evidence_updated' => true,
+
+    '\core\event\user_created' => true,
+    '\core\event\user_deleted' => true,
+    '\core\event\user_enrolment_created' => true,
+    '\core\event\user_enrolment_deleted' => true,
+    '\core\event\user_enrolment_updated' => true,
+    '\core\event\user_graded' => true,
+
+    '\mod_trainingevent\event\attendance_changed' => true,
+    '\mod_trainingevent\event\attendance_requested' => true,
+    '\mod_trainingevent\event\attendance_withdrawn' => true,
+    '\mod_trainingevent\event\user_added' => true,
+    '\mod_trainingevent\event\user_attending' => true,
+    '\mod_trainingevent\event\user_removed' => true,
+    '\mod_url\event\course_module_instance_list_viewed' => true,
+    '\core\event\course_completed' => true
+);
+
 // Group the events by plugin.
 $pluginlist = \tool_monitor\eventlist::get_plugin_list($eventlist);
 $plugineventlist = [];
 foreach ($pluginlist as $plugin => $pluginname) {
     foreach ($eventlist[$plugin] as $event => $eventname) {
         // Filter out events which cannot be triggered for some reason.
-        if (!$event::is_deprecated()) {
+
+        if ((!$event::is_deprecated()) && (isset($allowed_list[$event]) || is_siteadmin())) {
             $plugineventlist[$event] = "${pluginname}: ${eventname}";
         }
+
     }
 }
+
 
 // Get data ready for mform.
 $mform = new \tool_trigger\edit_form(

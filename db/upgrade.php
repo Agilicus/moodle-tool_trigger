@@ -289,5 +289,21 @@ function xmldb_tool_trigger_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2020061900, 'tool', 'trigger');
     }
 
+    if ($oldversion < 2020100400) {
+
+        // Define field companyid to be added to tool_trigger_workflows.
+        $table = new xmldb_table('tool_trigger_workflows');
+        $field = new xmldb_field('companyid', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+
+        // Conditionally launch add field id.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Trigger savepoint reached.
+        upgrade_plugin_savepoint(true, 2020100400, 'tool', 'trigger');
+    }
+
+
     return true;
 }

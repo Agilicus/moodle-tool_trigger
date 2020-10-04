@@ -86,6 +86,11 @@ class workflow {
     public $numsteps;
 
     /**
+     * @var int
+     */
+    public $companyid;
+
+    /**
      * Constructor.
      *
      * @param \stdClass $workflow
@@ -99,6 +104,7 @@ class workflow {
         $this->debug = $workflow->debug;
         $this->draft = $workflow->draft;
         $this->lasttriggered = $workflow->timetriggered;
+        $this->companyid = $workflow->companyid;
 
         $description = json_decode($workflow->description);
         $this->descriptiontext = $description->text;

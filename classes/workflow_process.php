@@ -84,6 +84,7 @@ class workflow_process {
             'workflowactive' => $workflow->active,
             'workflowrealtime' => $workflow->realtime,
             'workflowdebug' => $workflow->debug,
+            'companyid' => $workflow->companyid,
             'stepjson' => $this->encode_steps_to_json_for_form($workflow)
         ];
     }
@@ -207,12 +208,18 @@ class workflow_process {
         $workflowrecord->timecreated = $now;
         $workflowrecord->timemodified = $now;
         $workflowrecord->timetriggered = 0;
+        $workflowrecord->companyid = \iomad::get_my_companyid(\context_system::instance());
 
         try {
             $transaction = $DB->start_delegated_transaction();
             if ($isnewworkflow) {
                 $workflowid = $DB->insert_record('tool_trigger_workflows', $workflowrecord);
             } else {
+                $old_workflow = $DB->get_record('tool_trigger_workflows', array('id' => $formdata->workflowid));
+                if ($old_workflow->companyid != $workflowrecord->companyid) {
+                    $transaction->rollback($e);
+                    $return = false;
+                }
                 $workflowid = $formdata->workflowid;
                 $workflowrecord->id = $workflowid;
                 $DB->update_record('tool_trigger_workflows', $workflowrecord);
