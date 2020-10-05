@@ -29,7 +29,11 @@ defined('MOODLE_INTERNAL') || die();
 
 require_login();
 
-//admin_externalpage_setup('tool_trigger_worfklowsettings', '', null, '', array('pagelayout' => 'report'));
+$PAGE->set_url('/admin/tool/trigger/manage.php');
+$PAGE->set_context(context_system::instance());
+$PAGE->set_pagelayout('report');
+$PAGE->set_title('Manage Event Triggers');
+// admin_externalpage_setup('tool_trigger_worfklowsettings', '', null, '', array('pagelayout' => 'report'));
 
 $context = context_system::instance();
 

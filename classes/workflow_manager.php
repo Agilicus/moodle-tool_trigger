@@ -150,15 +150,18 @@ class workflow_manager {
         $where = "s.workflowid = w.id";
         $company = self::get_company_filter();
         if ($company) {
-            $where = $where . " and companyid=".$company['companyid'];
+            $company_filer = " where companyid=".$company['companyid'];
+        } else {
+            $company_filer = "";
         }
 
         $records = $DB->get_records_sql("
             select
                 *,
                 (select count(*) from {tool_trigger_steps} s where " . $where .") as numsteps
-            from {tool_trigger_workflows} w
-            order by name ASC",
+            from {tool_trigger_workflows} w ".
+            $company_filer .
+            "order by name ASC",
             null,
             $limitfrom,
             $limitto
@@ -166,6 +169,22 @@ class workflow_manager {
         $workflows = self::get_instances($records);
 
         return $workflows;
+    }
+
+    public function is_allowed_iomad_step($step) {
+        $iomad_classes = [
+            '\tool_trigger\steps\lookups\course_lookup_step' => true,
+            '\tool_trigger\steps\lookups\user_lookup_step' => true,
+
+            '\tool_trigger\steps\filters\numcompare_filter_step' => true,
+            '\tool_trigger\steps\filters\stringcompare_filter_step' => true,
+
+            '\tool_trigger\steps\actions\assign_course_action_step' => true,
+            '\tool_trigger\steps\actions\email_action_step' => true,
+            '\tool_trigger\steps\actions\http_post_action_step' => true,
+        ];
+
+        return isset($iomad_classes[$step]);
     }
 
     /**
@@ -197,8 +216,12 @@ class workflow_manager {
             }
             closedir($handle);
         }
+        if (!is_siteadmin()) {
+            $matchedsteps = array_filter($matchedsteps, "self::is_allowed_iomad_step");
+        }
         $matchedsteps = array_unique($matchedsteps);
 
+        //echo print_r($matchedsteps, true);
         return $matchedsteps;
 
     }
@@ -343,6 +366,7 @@ class workflow_manager {
      * @return \tool_trigger\steps\base\base_step
      */
     public function validate_and_make_step($stepclass, ...$params) {
+        //echo "validate and make step";
         if (!$this->validate_step_class($stepclass)) {
             throw new \invalid_parameter_exception(get_string('badstepclass', 'tool_trigger'));
         }

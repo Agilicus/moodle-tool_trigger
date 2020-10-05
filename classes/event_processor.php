@@ -204,6 +204,13 @@ class event_processor {
         global $DB;
 
         try {
+            if ($workflow->companyid!= null) {
+                $company = \company::by_userid;
+                if ($workflow->companyid != $company.get_topcompanyid()) {
+                    return;
+                }
+            }
+
             $workflow->timetriggered = time();
             $this->update_workflow_record($workflow);
             $runid = self::record_workflow_trigger($workflow->id, $evententry);

@@ -85,6 +85,8 @@ class course_lookup_step extends base_lookup_step {
     );
 
     protected function init() {
+        //echo "init!";
+
         $this->courseidfield = $this->data['courseidfield'];
         $this->outputprefix = $this->data['outputprefix'];
     }
@@ -107,6 +109,10 @@ class course_lookup_step extends base_lookup_step {
             }
 
             $courseid = $allfields[$this->courseidfield];
+        }
+
+        if (!iomad_check_course($this->courseidfield, $step->companyid)){
+            return [false, $stepresults];
         }
 
         $coursedata = $DB->get_record('course', ['id' => $courseid]);

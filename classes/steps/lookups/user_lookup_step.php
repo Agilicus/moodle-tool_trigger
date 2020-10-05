@@ -137,7 +137,12 @@ class user_lookup_step extends base_lookup_step {
         }
 
         $userfields = implode(',', self::$stepfields);
-        $userdata = \core_user::get_user($datafields[$this->useridfield], $userfields);
+        
+        if (iomad_check_user($datafields[$this->useridfield], $step->companyid)) {
+            $userdata = \core_user::get_user($datafields[$this->useridfield], $userfields);
+        } else {
+            $userdata = null;
+        }
 
         // Users are not typically deleted from the database on deletion; they're just flagged as "deleted".
         // So if no user with that ID is found, then throw an exception.
