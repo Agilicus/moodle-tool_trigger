@@ -111,7 +111,7 @@ class course_lookup_step extends base_lookup_step {
             $courseid = $allfields[$this->courseidfield];
         }
 
-        if (!iomad_check_course($this->courseidfield, $step->companyid)){
+        if ($this->iomad_check_course($this->courseidfield, $step->companyid)){
             return [false, $stepresults];
         }
 

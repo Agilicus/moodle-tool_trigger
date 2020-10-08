@@ -25,18 +25,29 @@
 
 namespace tool_trigger\helper;
 
-function iomad_check_course($courseid, $companyid) {
-    if ($companyid == null) {
-        return True;
-    } else {
-        return $DB->get_record( 'company_course', array('courseid' => $courseid) ) != null;
-    }
-}
+defined('MOODLE_INTERNAL') || die;
 
-function iomad_check_user($userid, $companyid) {
-    if (!$companyid == null) {
-        return True;
-    } else {
-        return \company::get_company_byuserid($userid).get_topcompanyid() == $companyid;
+trait iomad_safe {
+    function iomad_check_course($courseid, $companyid) {
+        global $DB;
+        if ($companyid == null) {
+            return True;
+        } else {
+            return $DB->get_record( 'company_course', array('courseid' => $courseid) ) != null;
+        }
+    }
+
+    function iomad_check_user($userid, $companyid) {
+        global $DB;
+        if (!$companyid == null) {
+            return True;
+        } else {
+            $company = \company::get_company_byuserid($userid);
+            if (!$company) {
+                return False;
+            }
+
+            return get_topcompanyid() == $companyid;
+        }
     }
 }

@@ -42,6 +42,7 @@ $string['assigncourseactionstepdec'] = 'A step that allows you to assign trainin
 $string['availablefields'] = 'Available fields';
 $string['badsteptype'] = 'Incorrect step type';
 $string['badstepclass'] = 'Incorrect step class name';
+$string['badworkflowcompany'] = "You don't have permission to edit this workflow";
 $string['cachedef_eventsubscriptions'] = 'Tool Trigger event subscription cache';
 $string['cleanupsettings'] = 'Clean up settings';
 $string['cleanupsettingsdesc'] = 'The following settings control the cleanup tasks for this plugin.';

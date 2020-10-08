@@ -84,7 +84,7 @@ $allowed_list = array(
     '\core\event\competency_user_evidence_deleted' => true,
     '\core\event\competency_user_evidence_updated' => true,
 
-    '\core\event\user_created' => true,
+    '\block_iomad_company_admin\event\company_user_assigned' => true,
     '\core\event\user_deleted' => true,
     '\core\event\user_enrolment_created' => true,
     '\core\event\user_enrolment_deleted' => true,
@@ -107,8 +107,7 @@ $plugineventlist = [];
 foreach ($pluginlist as $plugin => $pluginname) {
     foreach ($eventlist[$plugin] as $event => $eventname) {
         // Filter out events which cannot be triggered for some reason.
-
-        if ((!$event::is_deprecated()) && (isset($allowed_list[$event]) || is_siteadmin())) {
+        if (!$event::is_deprecated() && (isset($allowed_list[$event]) || is_siteadmin())) {
             $plugineventlist[$event] = "${pluginname}: ${eventname}";
         }
 

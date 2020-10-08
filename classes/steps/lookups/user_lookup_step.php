@@ -32,6 +32,7 @@ require_once($CFG->dirroot . '/user/profile/lib.php');
 class user_lookup_step extends base_lookup_step {
 
     use \tool_trigger\helper\datafield_manager;
+    use \tool_trigger\helper\iomad_safe;
 
     /**
      * The data field to get the user id from.
@@ -138,7 +139,7 @@ class user_lookup_step extends base_lookup_step {
 
         $userfields = implode(',', self::$stepfields);
         
-        if (iomad_check_user($datafields[$this->useridfield], $step->companyid)) {
+        if ($this->iomad_check_user($datafields[$this->useridfield], $step->companyid)) {
             $userdata = \core_user::get_user($datafields[$this->useridfield], $userfields);
         } else {
             $userdata = null;

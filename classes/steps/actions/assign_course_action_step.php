@@ -31,6 +31,7 @@ class assign_course_action_step extends base_action_step
 {
 
     use \tool_trigger\helper\datafield_manager;
+    use \tool_trigger\helper\iomad_safe;
 
     /**
      * The fields supplied by this step.
@@ -73,13 +74,13 @@ class assign_course_action_step extends base_action_step
 
         $datafields = $this->get_datafields($event, $stepresults);
 
-        if (iomad_check_course($this->courseidfield, $step->companyid) && iomad_check_user($this->useridfield, $step->companyid)){
-            company_user::enrol($datafields[$this->useridfield], array($this->courseidfield), $step->companyid);
-            $stepresults['course_assigned'] = $courseid;
-            return array(false, $stepresults);
+        if ($this->iomad_check_course($this->courseidfield, $step->companyid) && $this->iomad_check_user($this->useridfield, $step->companyid)){
+            \company_user::enrol($datafields[$this->useridfield], array($this->courseidfield), $step->companyid);
+            $stepresults['course_assigned'] = $this->courseidfield;
+            return array(true, $stepresults);
         }
 
-        return array(true, $stepresults);
+        return array(false, $stepresults);
     }
 
     /**

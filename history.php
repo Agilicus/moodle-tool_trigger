@@ -25,11 +25,15 @@
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 
-admin_externalpage_setup('tool_trigger_worfklowsettings', '', null, '', array('pagelayout' => 'report'));
-
-$context = context_system::instance();
 
 $PAGE->set_url(new moodle_url('/admin/tool/trigger/history.php'));
+$PAGE->set_context(context_system::instance());
+$PAGE->set_pagelayout('report');
+$PAGE->set_title('Event Trigger History');
+
+// admin_externalpage_setup('tool_trigger_worfklowsettings', '', null, '', array('pagelayout' => 'report'));
+
+$context = context_system::instance();
 
 // Check for caps.
 require_capability('tool/trigger:manageworkflows', $context);
@@ -40,6 +44,9 @@ $action = optional_param('action', null, PARAM_TEXT);
 if (!empty($action)) {
     $actionid = required_param('id', PARAM_INT);
 }
+
+$companyid = $DB->get_field("tool_trigger_workflows", "companyid", array( "id"=>$workflowid));
+iomad::require_capability('block/iomad_company_admin:company_edit_event_triggers', $context, $companyid);
 
 if (!empty($action) && confirm_sesskey()) {
     // Here we will handle page actions for steps and workflows.

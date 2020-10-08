@@ -38,6 +38,7 @@ defined('MOODLE_INTERNAL') || die();
  */
 class event_processor {
     use processor_helper;
+    use \tool_trigger\helper\iomad_safe;
 
     /**
      * Are we in the learning mode?
@@ -200,15 +201,27 @@ class event_processor {
         }
     }
 
+
+    private function iomad_workflow_filter($workflow, $evententry) {
+
+
+        if ($evententry->userid != 0 && $evententry->userid != -1) {
+            return $this->iomad_check_user($evententry->userid, $workflow->companyid);
+        }
+
+        if ($evententry->relateduserid != 0 && $evententry->relateduserid != -1) {
+            return $this->iomad_check_user($evententry->relateduserid, $workflow->companyid);
+        }
+
+        return is_siteadmin();
+    }
+
     private function process_realtime_workflow($workflow, $evententry) {
         global $DB;
 
         try {
-            if ($workflow->companyid!= null) {
-                $company = \company::by_userid;
-                if ($workflow->companyid != $company.get_topcompanyid()) {
-                    return;
-                }
+            if (!$this->iomad_workflow_filter($workflow, $evententry)) {
+                return;
             }
 
             $workflow->timetriggered = time();
@@ -222,6 +235,7 @@ class event_processor {
             $prevstep = null;
             foreach ($steps as $step) {
                 try {
+                    $step->companyid = $workflow->companyid;
                     $outertransaction = $DB->is_transaction_started();
                     list($success, $stepresults) = $this->execute_step($step,  new \stdClass(), $event, $stepresults);
 

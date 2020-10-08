@@ -216,9 +216,12 @@ class workflow_process {
                 $workflowid = $DB->insert_record('tool_trigger_workflows', $workflowrecord);
             } else {
                 $old_workflow = $DB->get_record('tool_trigger_workflows', array('id' => $formdata->workflowid));
-                if ($old_workflow->companyid != $workflowrecord->companyid) {
-                    $transaction->rollback($e);
-                    $return = false;
+                // if we edit a workflow for a customer it shouldn't change ownership
+                if (is_siteadmin()) {
+                    $workflowrecord->companyid = $old_workflow->companyid;
+                }
+                if (($old_workflow->companyid != $workflowrecord->companyid)) {
+                    throw new \invalid_parameter_exception('badworkflowcompany', 'tool_trigger', '');
                 }
                 $workflowid = $formdata->workflowid;
                 $workflowrecord->id = $workflowid;

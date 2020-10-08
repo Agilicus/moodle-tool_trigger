@@ -29,6 +29,7 @@ defined('MOODLE_INTERNAL') || die;
 class roles_lookup_step extends base_lookup_step {
 
     use \tool_trigger\helper\datafield_manager;
+    use \tool_trigger\helper\iomad_safe;
 
     /**
      * The data field to get the user id from.
