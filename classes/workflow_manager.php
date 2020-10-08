@@ -366,7 +366,6 @@ class workflow_manager {
      * @return \tool_trigger\steps\base\base_step
      */
     public function validate_and_make_step($stepclass, ...$params) {
-        //echo "validate and make step";
         if (!$this->validate_step_class($stepclass)) {
             throw new \invalid_parameter_exception(get_string('badstepclass', 'tool_trigger'));
         }

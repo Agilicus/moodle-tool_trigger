@@ -85,8 +85,6 @@ class course_lookup_step extends base_lookup_step {
     );
 
     protected function init() {
-        //echo "init!";
-
         $this->courseidfield = $this->data['courseidfield'];
         $this->outputprefix = $this->data['outputprefix'];
     }
